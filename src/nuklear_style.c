@@ -39,7 +39,8 @@ NK_API void nk_style_default(struct nk_context *ctx){nk_style_from_table(ctx, 0)
     NK_COLOR(NK_COLOR_KNOB,                     38, 38, 38, 255) \
     NK_COLOR(NK_COLOR_KNOB_CURSOR,              100,100,100,255) \
     NK_COLOR(NK_COLOR_KNOB_CURSOR_HOVER,        120,120,120,255) \
-    NK_COLOR(NK_COLOR_KNOB_CURSOR_ACTIVE,       150,150,150,255)
+    NK_COLOR(NK_COLOR_KNOB_CURSOR_ACTIVE,       150,150,150,255) \
+    NK_COLOR(NK_COLOR_TOOLTIP,                  159,202,255,255)
 
 NK_GLOBAL const struct nk_color
 nk_default_color_style[NK_COLOR_COUNT] = {
@@ -108,6 +109,7 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     struct nk_style_chart *chart;
     struct nk_style_tab *tab;
     struct nk_style_window *win;
+    struct nk_style_tooltip *tooltip;
 
     NK_ASSERT(ctx);
     if (!ctx) return;
@@ -120,6 +122,13 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     text->padding = nk_vec2(0,0);
     text->color_factor = 1.0f;
     text->disabled_factor = NK_WIDGET_DISABLED_FACTOR;
+
+    /* default toolip */
+    tooltip = &style->tooltip;
+    tooltip->color = table[NK_COLOR_TOOLTIP];
+    tooltip->text = "(?)";
+    tooltip->offset = nk_vec2(15, 10);
+    tooltip->text_padding = 5;
 
     /* default button */
     button = &style->button;

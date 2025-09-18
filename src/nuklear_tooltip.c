@@ -37,6 +37,9 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
     bounds.w = (float)w;
     bounds.h = (float)h;
 
+    bounds.x += ctx->style.tooltip.offset.x;
+    bounds.y += ctx->style.tooltip.offset.y;
+
     ret = nk_popup_begin(ctx, NK_POPUP_DYNAMIC,
         "__##Tooltip##__", NK_WINDOW_NO_SCROLLBAR|NK_WINDOW_BORDER, bounds);
     if (ret) win->layout->flags &= ~(nk_flags)NK_WINDOW_ROM;

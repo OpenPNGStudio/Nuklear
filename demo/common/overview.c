@@ -18,7 +18,7 @@ overview(struct nk_context *ctx)
 
 #ifdef INCLUDE_STYLE
     /* styles */
-    static const char* themes[] = {"Black", "White", "Red", "Blue", "Dark", "Dracula", 
+    static const char* themes[] = {"Black", "White", "Red", "Blue", "Dark", "Dracula",
       "Catppucin Latte", "Catppucin Frappe", "Catppucin Macchiato", "Catppucin Mocha"};
     static int current_theme = 0;
 #endif
@@ -835,10 +835,14 @@ overview(struct nk_context *ctx)
             }
 
             /* tooltip */
-            nk_layout_row_static(ctx, 30, 150, 1);
+            nk_layout_row_static(ctx, 30, 300, 1);
             bounds = nk_widget_bounds(ctx);
             nk_label(ctx, "Hover me for tooltip", NK_TEXT_LEFT);
             if (nk_input_is_mouse_hovering_rect(in, bounds))
+                nk_tooltip(ctx, "This is a tooltip");
+
+            nk_label_with_tooltip(ctx, "Hover over (?) for tooltip", NK_TEXT_LEFT);
+            if (ctx->tooltip_active)
                 nk_tooltip(ctx, "This is a tooltip");
 
             nk_tree_pop(ctx);

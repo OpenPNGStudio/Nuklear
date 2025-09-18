@@ -256,6 +256,7 @@ struct nk_style_combo;
 struct nk_style_tab;
 struct nk_style_window_header;
 struct nk_style_window;
+struct nk_style_tooltip;
 
 enum {nk_false, nk_true};
 struct nk_color {nk_byte r,g,b,a;};
@@ -3130,6 +3131,7 @@ NK_API void nk_text_colored(struct nk_context*, const char*, int, nk_flags, stru
 NK_API void nk_text_wrap(struct nk_context*, const char*, int);
 NK_API void nk_text_wrap_colored(struct nk_context*, const char*, int, struct nk_color);
 NK_API void nk_label(struct nk_context*, const char*, nk_flags align);
+NK_API void nk_label_with_tooltip(struct nk_context*, const char*, nk_flags align);
 NK_API void nk_label_colored(struct nk_context*, const char*, nk_flags align, struct nk_color);
 NK_API void nk_label_wrap(struct nk_context*, const char*);
 NK_API void nk_label_colored_wrap(struct nk_context*, const char*, struct nk_color);
@@ -3659,6 +3661,7 @@ enum nk_style_colors {
     NK_COLOR_KNOB_CURSOR,
     NK_COLOR_KNOB_CURSOR_HOVER,
     NK_COLOR_KNOB_CURSOR_ACTIVE,
+    NK_COLOR_TOOLTIP,
     NK_COLOR_COUNT
 };
 enum nk_style_cursor {
@@ -5343,6 +5346,13 @@ struct nk_style_window {
     struct nk_vec2 tooltip_padding;
 };
 
+struct nk_style_tooltip {
+    struct nk_color color;
+    struct nk_vec2 offset;
+    char *text;
+    float text_padding;
+};
+
 struct nk_style {
     const struct nk_user_font *font;
     const struct nk_cursor *cursors[NK_CURSOR_COUNT];
@@ -5368,6 +5378,7 @@ struct nk_style {
     struct nk_style_tab tab;
     struct nk_style_combo combo;
     struct nk_style_window window;
+    struct nk_style_tooltip tooltip;
 };
 
 NK_API struct nk_style_item nk_style_item_color(struct nk_color);
@@ -5711,6 +5722,7 @@ struct nk_context {
     enum nk_button_behavior button_behavior;
     struct nk_configuration_stacks stacks;
     float delta_time_seconds;
+    nk_bool tooltip_active;
 
 /* private:
     should only be accessed if you
@@ -5740,6 +5752,8 @@ struct nk_context {
     struct nk_page_element *freelist;
     unsigned int count;
     unsigned int seq;
+
+    nk_bool show_tooltip;
 };
 
 /* ==============================================================

@@ -479,6 +479,7 @@ struct nk_style_combo;
 struct nk_style_tab;
 struct nk_style_window_header;
 struct nk_style_window;
+struct nk_style_tooltip;
 
 enum {nk_false, nk_true};
 struct nk_color {nk_byte r,g,b,a;};
@@ -3353,6 +3354,7 @@ NK_API void nk_text_colored(struct nk_context*, const char*, int, nk_flags, stru
 NK_API void nk_text_wrap(struct nk_context*, const char*, int);
 NK_API void nk_text_wrap_colored(struct nk_context*, const char*, int, struct nk_color);
 NK_API void nk_label(struct nk_context*, const char*, nk_flags align);
+NK_API void nk_label_with_tooltip(struct nk_context*, const char*, nk_flags align);
 NK_API void nk_label_colored(struct nk_context*, const char*, nk_flags align, struct nk_color);
 NK_API void nk_label_wrap(struct nk_context*, const char*);
 NK_API void nk_label_colored_wrap(struct nk_context*, const char*, struct nk_color);
@@ -3882,6 +3884,7 @@ enum nk_style_colors {
     NK_COLOR_KNOB_CURSOR,
     NK_COLOR_KNOB_CURSOR_HOVER,
     NK_COLOR_KNOB_CURSOR_ACTIVE,
+    NK_COLOR_TOOLTIP,
     NK_COLOR_COUNT
 };
 enum nk_style_cursor {
@@ -5566,6 +5569,13 @@ struct nk_style_window {
     struct nk_vec2 tooltip_padding;
 };
 
+struct nk_style_tooltip {
+    struct nk_color color;
+    struct nk_vec2 offset;
+    char *text;
+    float text_padding;
+};
+
 struct nk_style {
     const struct nk_user_font *font;
     const struct nk_cursor *cursors[NK_CURSOR_COUNT];
@@ -5591,6 +5601,7 @@ struct nk_style {
     struct nk_style_tab tab;
     struct nk_style_combo combo;
     struct nk_style_window window;
+    struct nk_style_tooltip tooltip;
 };
 
 NK_API struct nk_style_item nk_style_item_color(struct nk_color);
@@ -5934,6 +5945,7 @@ struct nk_context {
     enum nk_button_behavior button_behavior;
     struct nk_configuration_stacks stacks;
     float delta_time_seconds;
+    nk_bool tooltip_active;
 
 /* private:
     should only be accessed if you
@@ -5963,6 +5975,8 @@ struct nk_context {
     struct nk_page_element *freelist;
     unsigned int count;
     unsigned int seq;
+
+    nk_bool show_tooltip;
 };
 
 /* ==============================================================
@@ -6288,7 +6302,7 @@ struct nk_text {
     struct nk_color background;
     struct nk_color text;
 };
-NK_LIB void nk_widget_text(struct nk_command_buffer *o, struct nk_rect b, const char *string, int len, const struct nk_text *t, nk_flags a, const struct nk_user_font *f);
+NK_LIB struct nk_rect nk_widget_text(struct nk_command_buffer *o, struct nk_rect b, const char *string, int len, const struct nk_text *t, nk_flags a, const struct nk_user_font *f);
 NK_LIB void nk_widget_text_wrap(struct nk_command_buffer *o, struct nk_rect b, const char *string, int len, const struct nk_text *t, const struct nk_user_font *f);
 
 /* button */
@@ -18505,7 +18519,8 @@ NK_API void nk_style_default(struct nk_context *ctx){nk_style_from_table(ctx, 0)
     NK_COLOR(NK_COLOR_KNOB,                     38, 38, 38, 255) \
     NK_COLOR(NK_COLOR_KNOB_CURSOR,              100,100,100,255) \
     NK_COLOR(NK_COLOR_KNOB_CURSOR_HOVER,        120,120,120,255) \
-    NK_COLOR(NK_COLOR_KNOB_CURSOR_ACTIVE,       150,150,150,255)
+    NK_COLOR(NK_COLOR_KNOB_CURSOR_ACTIVE,       150,150,150,255) \
+    NK_COLOR(NK_COLOR_TOOLTIP,                  159,202,255,255)
 
 NK_GLOBAL const struct nk_color
 nk_default_color_style[NK_COLOR_COUNT] = {
@@ -18574,6 +18589,7 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     struct nk_style_chart *chart;
     struct nk_style_tab *tab;
     struct nk_style_window *win;
+    struct nk_style_tooltip *tooltip;
 
     NK_ASSERT(ctx);
     if (!ctx) return;
@@ -18586,6 +18602,13 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     text->padding = nk_vec2(0,0);
     text->color_factor = 1.0f;
     text->disabled_factor = NK_WIDGET_DISABLED_FACTOR;
+
+    /* default toolip */
+    tooltip = &style->tooltip;
+    tooltip->color = table[NK_COLOR_TOOLTIP];
+    tooltip->text = "(?)";
+    tooltip->offset = nk_vec2(15, 10);
+    tooltip->text_padding = 5;
 
     /* default button */
     button = &style->button;
@@ -23792,7 +23815,7 @@ nk_widget_disable_end(struct nk_context* ctx)
  *                              TEXT
  *
  * ===============================================================*/
-NK_LIB void
+NK_LIB struct nk_rect
 nk_widget_text(struct nk_command_buffer *o, struct nk_rect b,
     const char *string, int len, const struct nk_text *t,
     nk_flags a, const struct nk_user_font *f)
@@ -23802,7 +23825,7 @@ nk_widget_text(struct nk_command_buffer *o, struct nk_rect b,
 
     NK_ASSERT(o);
     NK_ASSERT(t);
-    if (!o || !t) return;
+    if (!o || !t) return nk_rect(0, 0, 0, 0);
 
     b.h = NK_MAX(b.h, 2 * t->padding.y);
     label.x = 0; label.w = 0;
@@ -23825,7 +23848,7 @@ nk_widget_text(struct nk_command_buffer *o, struct nk_rect b,
     } else if (a & NK_TEXT_ALIGN_RIGHT) {
         label.x = NK_MAX(b.x + t->padding.x, (b.x + b.w) - (2 * t->padding.x + (float)text_width));
         label.w = (float)text_width + 2 * t->padding.x;
-    } else return;
+    } else return label;
 
     /* align in y-axis */
     if (a & NK_TEXT_ALIGN_MIDDLE) {
@@ -23836,7 +23859,9 @@ nk_widget_text(struct nk_command_buffer *o, struct nk_rect b,
         label.h = f->height;
     }
     nk_draw_text(o, label, (const char*)string, len, f, t->background, t->text);
+    return label;
 }
+
 NK_LIB void
 nk_widget_text_wrap(struct nk_command_buffer *o, struct nk_rect b,
     const char *string, int len, const struct nk_text *t,
@@ -23886,6 +23911,9 @@ nk_text_colored(struct nk_context *ctx, const char *str, int len,
     struct nk_vec2 item_padding;
     struct nk_rect bounds;
     struct nk_text text;
+    const struct nk_user_font *font;
+    float width;
+    int l;
 
     NK_ASSERT(ctx);
     NK_ASSERT(ctx->current);
@@ -23896,12 +23924,35 @@ nk_text_colored(struct nk_context *ctx, const char *str, int len,
     style = &ctx->style;
     nk_panel_alloc_space(&bounds, ctx);
     item_padding = style->text.padding;
+    font = style->font;
 
     text.padding.x = item_padding.x;
     text.padding.y = item_padding.y;
     text.background = style->window.background;
     text.text = nk_rgb_factor(color, style->text.color_factor);
-    nk_widget_text(&win->buffer, bounds, str, len, &text, alignment, style->font);
+
+    bounds = nk_widget_text(&win->buffer, bounds, str, len, &text, alignment,
+        font);
+
+    if (ctx->show_tooltip) {
+        width = font->width(font->userdata, font->height, str, len);
+        l = nk_strlen(style->tooltip.text);
+
+        if (alignment & NK_TEXT_ALIGN_RIGHT) bounds.x -= width;
+        else bounds.x += width;
+
+        bounds.w = font->width(font->userdata, font->height, style->tooltip.text,
+            l);
+        bounds.x += style->tooltip.text_padding;
+
+        text.text = nk_rgb_factor(style->tooltip.color, style->text.color_factor);
+
+        nk_draw_text(&win->buffer, bounds, style->tooltip.text, l, font,
+            text.background, text.text);
+
+        ctx->tooltip_active = nk_input_is_mouse_hovering_rect(&ctx->input, bounds);
+    }
+
 }
 NK_API void
 nk_text_wrap_colored(struct nk_context *ctx, const char *str,
@@ -24058,6 +24109,13 @@ NK_API void
 nk_label(struct nk_context *ctx, const char *str, nk_flags alignment)
 {
     nk_text(ctx, str, nk_strlen(str), alignment);
+}
+NK_API void
+nk_label_with_tooltip(struct nk_context *ctx, const char *str, nk_flags alignment)
+{
+    ctx->show_tooltip = nk_true;
+    nk_text(ctx, str, nk_strlen(str), alignment);
+    ctx->show_tooltip = nk_false;
 }
 NK_API void
 nk_label_colored(struct nk_context *ctx, const char *str, nk_flags align,
@@ -30587,6 +30645,9 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
     bounds.y = (float)y;
     bounds.w = (float)w;
     bounds.h = (float)h;
+
+    bounds.x += ctx->style.tooltip.offset.x;
+    bounds.y += ctx->style.tooltip.offset.y;
 
     ret = nk_popup_begin(ctx, NK_POPUP_DYNAMIC,
         "__##Tooltip##__", NK_WINDOW_NO_SCROLLBAR|NK_WINDOW_BORDER, bounds);
