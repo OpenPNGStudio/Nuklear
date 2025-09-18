@@ -5984,7 +5984,9 @@ struct nk_context {
  * =============================================================== */
 #define NK_PI 3.141592654f
 #define NK_PI_HALF 1.570796326f
+#ifndef NK_UTF_INVALID
 #define NK_UTF_INVALID 0xFFFD
+#endif
 #define NK_MAX_FLOAT_PRECISION 2
 
 #define NK_UNUSED(x) ((void)(x))
