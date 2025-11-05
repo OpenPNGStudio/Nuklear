@@ -5180,6 +5180,7 @@ struct nk_style_toggle {
     float border;
     float color_factor;
     float disabled_factor;
+    float rounding;
 
     /* optional user callbacks */
     nk_handle userdata;
@@ -18701,6 +18702,7 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     toggle->border          = 0.0f;
     toggle->spacing         = 4;
     toggle->color_factor    = 1.0f;
+    toggle->rounding        = 0.0f;
     toggle->disabled_factor = NK_WIDGET_DISABLED_FACTOR;
 
     /* option toggle */
@@ -25134,13 +25136,13 @@ nk_draw_checkbox(struct nk_command_buffer *out,
 
     /* draw background and cursor */
     if (background->type == NK_STYLE_ITEM_COLOR) {
-        nk_fill_rect(out, *selector, 0, nk_rgb_factor(style->border_color, style->color_factor));
-        nk_fill_rect(out, nk_shrink_rect(*selector, style->border), 0, nk_rgb_factor(background->data.color, style->color_factor));
+        nk_fill_rect(out, *selector, style->rounding, nk_rgb_factor(style->border_color, style->color_factor));
+        nk_fill_rect(out, nk_shrink_rect(*selector, style->border), style->rounding, nk_rgb_factor(background->data.color, style->color_factor));
     } else nk_draw_image(out, *selector, &background->data.image, nk_rgb_factor(nk_white, style->color_factor));
     if (active) {
         if (cursor->type == NK_STYLE_ITEM_IMAGE)
             nk_draw_image(out, *cursors, &cursor->data.image, nk_rgb_factor(nk_white, style->color_factor));
-        else nk_fill_rect(out, *cursors, 0, cursor->data.color);
+        else nk_fill_rect(out, *cursors, style->rounding, cursor->data.color);
     }
 }
 NK_LIB void

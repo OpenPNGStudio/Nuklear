@@ -4957,6 +4957,7 @@ struct nk_style_toggle {
     float border;
     float color_factor;
     float disabled_factor;
+    float rounding;
 
     /* optional user callbacks */
     nk_handle userdata;

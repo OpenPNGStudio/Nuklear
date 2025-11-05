@@ -166,6 +166,8 @@ main(void)
 #endif
                     xw.width, xw.height);
 
+    ctx->style.checkbox.rounding = 3.0f;
+
     while (running)
     {
         /* Input */

@@ -219,6 +219,7 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     toggle->border          = 0.0f;
     toggle->spacing         = 4;
     toggle->color_factor    = 1.0f;
+    toggle->rounding        = 0.0f;
     toggle->disabled_factor = NK_WIDGET_DISABLED_FACTOR;
 
     /* option toggle */
