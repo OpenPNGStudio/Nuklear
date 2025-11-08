@@ -180,8 +180,10 @@ nk_do_selectable_symbol(nk_flags *state, struct nk_command_buffer *out,
     icon.y = bounds.y + style->padding.y;
     icon.w = icon.h = bounds.h - 2 * style->padding.y;
     if (align & NK_TEXT_ALIGN_LEFT) {
-        icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
-        icon.x = NK_MAX(icon.x, 0);
+        bounds.x += icon.w + 2 * style->padding.x;
+        bounds.w -= icon.w;
+        // icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
+        // icon.x = NK_MAX(icon.x, 0);
     } else icon.x = bounds.x + 2 * style->padding.x;
 
     icon.x += style->image_padding.x;
