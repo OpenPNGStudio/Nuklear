@@ -25584,7 +25584,14 @@ nk_draw_selectable(struct nk_command_buffer *out,
         if (img) nk_draw_image(out, *icon, img, nk_rgb_factor(nk_white, style->color_factor));
         else nk_draw_symbol(out, sym, *icon, text.background, text.text, 1, font);
     }
-    nk_widget_text(out, *bounds, string, len, &text, align, font);
+
+    struct nk_rect copy = *bounds;
+
+    if (align & NK_TEXT_LEFT) {
+        copy.x += icon->w + 2 * style->padding.x;
+    }
+
+    nk_widget_text(out, copy, string, len, &text, align, font);
 }
 NK_LIB nk_bool
 nk_do_selectable(nk_flags *state, struct nk_command_buffer *out,
@@ -25653,10 +25660,7 @@ nk_do_selectable_image(nk_flags *state, struct nk_command_buffer *out,
 
     icon.y = bounds.y + style->padding.y;
     icon.w = icon.h = bounds.h - 2 * style->padding.y;
-    if (align & NK_TEXT_ALIGN_LEFT) {
-        icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
-        icon.x = NK_MAX(icon.x, 0);
-    } else icon.x = bounds.x + 2 * style->padding.x;
+    icon.x = bounds.x + style->padding.x;
 
     icon.x += style->image_padding.x;
     icon.y += style->image_padding.y;
@@ -25701,10 +25705,8 @@ nk_do_selectable_symbol(nk_flags *state, struct nk_command_buffer *out,
     icon.y = bounds.y + style->padding.y;
     icon.w = icon.h = bounds.h - 2 * style->padding.y;
     if (align & NK_TEXT_ALIGN_LEFT) {
-        bounds.x += icon.w + 2 * style->padding.x;
-        bounds.w -= icon.w;
-        // icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
-        // icon.x = NK_MAX(icon.x, 0);
+        icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
+        icon.x = NK_MAX(icon.x, 0);
     } else icon.x = bounds.x + 2 * style->padding.x;
 
     icon.x += style->image_padding.x;
