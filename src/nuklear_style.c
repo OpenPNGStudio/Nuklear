@@ -697,6 +697,29 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     button->draw_begin      = 0;
     button->draw_end        = 0;
 
+    /* window header maximize button */
+    button = &style->window.header.maximize_button;
+    nk_zero_struct(*button);
+    button->normal          = nk_style_item_color(table[NK_COLOR_HEADER]);
+    button->hover           = nk_style_item_color(table[NK_COLOR_HEADER]);
+    button->active          = nk_style_item_color(table[NK_COLOR_HEADER]);
+    button->border_color    = nk_rgba(0,0,0,0);
+    button->text_background = table[NK_COLOR_HEADER];
+    button->text_normal     = table[NK_COLOR_TEXT];
+    button->text_hover      = table[NK_COLOR_TEXT];
+    button->text_active     = table[NK_COLOR_TEXT];
+    button->padding         = nk_vec2(0.0f,0.0f);
+    button->touch_padding   = nk_vec2(0.0f,0.0f);
+    button->userdata        = nk_handle_ptr(0);
+    button->text_alignment  = NK_TEXT_CENTERED;
+    button->border          = 0.0f;
+    button->rounding        = 0.0f;
+    button->color_factor_text    = 1.0f;
+    button->color_factor_background = 1.0f;
+    button->disabled_factor = NK_WIDGET_DISABLED_FACTOR;
+    button->draw_begin      = 0;
+    button->draw_end        = 0;
+
     /* window */
     win->background = table[NK_COLOR_WINDOW];
     win->fixed_background = nk_style_item_color(table[NK_COLOR_WINDOW]);

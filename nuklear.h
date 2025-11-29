@@ -5517,6 +5517,7 @@ struct nk_style_window_header {
     /* button */
     struct nk_style_button close_button;
     struct nk_style_button minimize_button;
+    struct nk_style_button maximize_button;
     enum nk_symbol_type close_symbol;
     enum nk_symbol_type minimize_symbol;
     enum nk_symbol_type maximize_symbol;
@@ -19180,6 +19181,29 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     button->draw_begin      = 0;
     button->draw_end        = 0;
 
+    /* window header maximize button */
+    button = &style->window.header.maximize_button;
+    nk_zero_struct(*button);
+    button->normal          = nk_style_item_color(table[NK_COLOR_HEADER]);
+    button->hover           = nk_style_item_color(table[NK_COLOR_HEADER]);
+    button->active          = nk_style_item_color(table[NK_COLOR_HEADER]);
+    button->border_color    = nk_rgba(0,0,0,0);
+    button->text_background = table[NK_COLOR_HEADER];
+    button->text_normal     = table[NK_COLOR_TEXT];
+    button->text_hover      = table[NK_COLOR_TEXT];
+    button->text_active     = table[NK_COLOR_TEXT];
+    button->padding         = nk_vec2(0.0f,0.0f);
+    button->touch_padding   = nk_vec2(0.0f,0.0f);
+    button->userdata        = nk_handle_ptr(0);
+    button->text_alignment  = NK_TEXT_CENTERED;
+    button->border          = 0.0f;
+    button->rounding        = 0.0f;
+    button->color_factor_text    = 1.0f;
+    button->color_factor_background = 1.0f;
+    button->disabled_factor = NK_WIDGET_DISABLED_FACTOR;
+    button->draw_begin      = 0;
+    button->draw_end        = 0;
+
     /* window */
     win->background = table[NK_COLOR_WINDOW];
     win->fixed_background = nk_style_item_color(table[NK_COLOR_WINDOW]);
@@ -20192,12 +20216,15 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
                 button.x = header.x;
                 header.x += button.w + style->window.header.spacing.x + style->window.header.padding.x;
             }
-            if (nk_do_button_symbol(&ws, &win->buffer, button, (layout->flags & NK_WINDOW_MINIMIZED)?
-                style->window.header.maximize_symbol: style->window.header.minimize_symbol,
-                NK_BUTTON_DEFAULT, &style->window.header.minimize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))
-                layout->flags = (layout->flags & NK_WINDOW_MINIMIZED) ?
-                    layout->flags & (nk_flags)~NK_WINDOW_MINIMIZED:
-                    layout->flags | NK_WINDOW_MINIMIZED;
+            if (layout->flags & NK_WINDOW_MINIMIZED) {
+                if (nk_do_button_symbol(&ws, &win->buffer, button, style->window.header.maximize_symbol,
+                    NK_BUTTON_DEFAULT, &style->window.header.maximize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))
+                    layout->flags = layout->flags & (nk_flags) ~NK_WINDOW_MINIMIZED;
+            } else {
+                if (nk_do_button_symbol(&ws, &win->buffer, button, style->window.header.minimize_symbol,
+                    NK_BUTTON_DEFAULT, &style->window.header.minimize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))
+                    layout->flags = layout->flags | NK_WINDOW_MINIMIZED;
+            }
         }}
 
         {/* window header title */

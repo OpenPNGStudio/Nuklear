@@ -5294,6 +5294,7 @@ struct nk_style_window_header {
     /* button */
     struct nk_style_button close_button;
     struct nk_style_button minimize_button;
+    struct nk_style_button maximize_button;
     enum nk_symbol_type close_symbol;
     enum nk_symbol_type minimize_symbol;
     enum nk_symbol_type maximize_symbol;

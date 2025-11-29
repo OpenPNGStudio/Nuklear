@@ -270,12 +270,15 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
                 button.x = header.x;
                 header.x += button.w + style->window.header.spacing.x + style->window.header.padding.x;
             }
-            if (nk_do_button_symbol(&ws, &win->buffer, button, (layout->flags & NK_WINDOW_MINIMIZED)?
-                style->window.header.maximize_symbol: style->window.header.minimize_symbol,
-                NK_BUTTON_DEFAULT, &style->window.header.minimize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))
-                layout->flags = (layout->flags & NK_WINDOW_MINIMIZED) ?
-                    layout->flags & (nk_flags)~NK_WINDOW_MINIMIZED:
-                    layout->flags | NK_WINDOW_MINIMIZED;
+            if (layout->flags & NK_WINDOW_MINIMIZED) {
+                if (nk_do_button_symbol(&ws, &win->buffer, button, style->window.header.maximize_symbol,
+                    NK_BUTTON_DEFAULT, &style->window.header.maximize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))
+                    layout->flags = layout->flags & (nk_flags) ~NK_WINDOW_MINIMIZED;
+            } else {
+                if (nk_do_button_symbol(&ws, &win->buffer, button, style->window.header.minimize_symbol,
+                    NK_BUTTON_DEFAULT, &style->window.header.minimize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))
+                    layout->flags = layout->flags | NK_WINDOW_MINIMIZED;
+            }
         }}
 
         {/* window header title */
