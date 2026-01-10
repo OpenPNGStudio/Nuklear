@@ -448,7 +448,7 @@ nk_combo_begin_symbol_text(struct nk_context *ctx, const char *selected, int len
     return nk_combo_begin(ctx, win, size, is_clicked, header);
 }
 NK_API nk_bool
-nk_combo_begin_image(struct nk_context *ctx, struct nk_image img, struct nk_vec2 size)
+nk_combo_begin_image(struct nk_context *ctx, struct nk_image img[2], struct nk_vec2 size)
 {
     struct nk_window *win;
     struct nk_style *style;
@@ -529,7 +529,11 @@ nk_combo_begin_image(struct nk_context *ctx, struct nk_image img, struct nk_vec2
             bounds.w = (button.x - style->combo.content_padding.y) - bounds.x;
         else
             bounds.w = header.w - 2 * style->combo.content_padding.x;
-        nk_draw_image(&win->buffer, bounds, &img, nk_rgb_factor(nk_white, style->combo.color_factor));
+
+        if (is_clicked)
+            nk_draw_image(&win->buffer, bounds, &img[1], nk_rgb_factor(nk_white, style->combo.color_factor));
+        else
+            nk_draw_image(&win->buffer, bounds, &img[0], nk_rgb_factor(nk_white, style->combo.color_factor));
 
         /* draw open/close button */
         if (draw_button_symbol)
@@ -540,7 +544,7 @@ nk_combo_begin_image(struct nk_context *ctx, struct nk_image img, struct nk_vec2
 }
 NK_API nk_bool
 nk_combo_begin_image_text(struct nk_context *ctx, const char *selected, int len,
-    struct nk_image img, struct nk_vec2 size)
+    struct nk_image img[2], struct nk_vec2 size)
 {
     struct nk_window *win;
     struct nk_style *style;
@@ -632,7 +636,11 @@ nk_combo_begin_image_text(struct nk_context *ctx, const char *selected, int len,
         image.y = header.y + style->combo.content_padding.y;
         image.h = header.h - 2 * style->combo.content_padding.y;
         image.w = image.h;
-        nk_draw_image(&win->buffer, image, &img, nk_rgb_factor(nk_white, style->combo.color_factor));
+
+        if (is_clicked)
+            nk_draw_image(&win->buffer, image, &img[1], nk_rgb_factor(nk_white, style->combo.color_factor));
+        else
+            nk_draw_image(&win->buffer, image, &img[0], nk_rgb_factor(nk_white, style->combo.color_factor));
 
         /* draw label */
         text.padding = nk_vec2(0,0);
@@ -655,7 +663,7 @@ nk_combo_begin_symbol_label(struct nk_context *ctx,
 }
 NK_API nk_bool
 nk_combo_begin_image_label(struct nk_context *ctx,
-    const char *selected, struct nk_image img, struct nk_vec2 size)
+    const char *selected, struct nk_image img[2], struct nk_vec2 size)
 {
     return nk_combo_begin_image_text(ctx, selected, nk_strlen(selected), img, size);
 }

@@ -157,6 +157,7 @@ overview(struct nk_context *ctx)
             nk_checkbox_flags_label(ctx, "No Scrollbar", &window_flags, NK_WINDOW_NO_SCROLLBAR);
             nk_checkbox_flags_label(ctx, "Minimizable", &window_flags, NK_WINDOW_MINIMIZABLE);
             nk_checkbox_flags_label(ctx, "Scale Left", &window_flags, NK_WINDOW_SCALE_LEFT);
+            nk_checkbox_flags_label(ctx, "Auto Scroll", &window_flags, NK_WINDOW_SCROLL_AUTO_HIDE);
             nk_checkbox_label(ctx, "Disable widgets", &disable_widgets);
             nk_tree_pop(ctx);
         }
@@ -839,10 +840,6 @@ overview(struct nk_context *ctx)
             bounds = nk_widget_bounds(ctx);
             nk_label(ctx, "Hover me for tooltip", NK_TEXT_LEFT);
             if (nk_input_is_mouse_hovering_rect(in, bounds))
-                nk_tooltip(ctx, "This is a tooltip");
-
-            nk_label_with_tooltip(ctx, "Hover over (?) for tooltip", NK_TEXT_LEFT);
-            if (ctx->tooltip_active)
                 nk_tooltip(ctx, "This is a tooltip");
 
             nk_tree_pop(ctx);

@@ -3560,9 +3560,9 @@ NK_API nk_bool nk_combo_begin_color(struct nk_context*, struct nk_color color, s
 NK_API nk_bool nk_combo_begin_symbol(struct nk_context*,  enum nk_symbol_type,  struct nk_vec2 size);
 NK_API nk_bool nk_combo_begin_symbol_label(struct nk_context*, const char *selected, enum nk_symbol_type, struct nk_vec2 size);
 NK_API nk_bool nk_combo_begin_symbol_text(struct nk_context*, const char *selected, int, enum nk_symbol_type, struct nk_vec2 size);
-NK_API nk_bool nk_combo_begin_image(struct nk_context*, struct nk_image img,  struct nk_vec2 size);
-NK_API nk_bool nk_combo_begin_image_label(struct nk_context*, const char *selected, struct nk_image, struct nk_vec2 size);
-NK_API nk_bool nk_combo_begin_image_text(struct nk_context*,  const char *selected, int, struct nk_image, struct nk_vec2 size);
+NK_API nk_bool nk_combo_begin_image(struct nk_context*, struct nk_image img[2],  struct nk_vec2 size);
+NK_API nk_bool nk_combo_begin_image_label(struct nk_context*, const char *selected, struct nk_image img[2], struct nk_vec2 size);
+NK_API nk_bool nk_combo_begin_image_text(struct nk_context*,  const char *selected, int, struct nk_image img[2], struct nk_vec2 size);
 NK_API nk_bool nk_combo_item_label(struct nk_context*, const char*, nk_flags alignment);
 NK_API nk_bool nk_combo_item_text(struct nk_context*, const char*,int, nk_flags alignment);
 NK_API nk_bool nk_combo_item_image_label(struct nk_context*, struct nk_image, const char*, nk_flags alignment);
