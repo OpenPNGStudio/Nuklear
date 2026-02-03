@@ -556,6 +556,10 @@ nk_combo_begin_image_text(struct nk_context *ctx, const char *selected, int len,
     const struct nk_style_item *background;
     struct nk_text text;
 
+    nk_hash hash;
+    int is_active = 0;
+    struct nk_window *popup;
+
     NK_ASSERT(ctx);
     NK_ASSERT(ctx->current);
     NK_ASSERT(ctx->current->layout);
@@ -614,6 +618,10 @@ nk_combo_begin_image_text(struct nk_context *ctx, const char *selected, int len,
             sym = style->combo.sym_active;
         else sym = style->combo.sym_normal;
 
+        popup = win->popup.win;
+        hash = win->popup.combo_count;
+        is_active = (popup && (win->popup.name == hash) && win->popup.type == NK_PANEL_COMBO);
+
         /* represents whether or not the combo's button symbol should be drawn */
         draw_button_symbol = sym != NK_SYMBOL_NONE;
 
@@ -632,19 +640,20 @@ nk_combo_begin_image_text(struct nk_context *ctx, const char *selected, int len,
                 &ctx->style.combo.button, sym, style->font);
 
         /* draw image */
-        image.x = header.x + style->combo.content_padding.x;
+        image.x = button.x + button.w + style->combo.content_padding.x;
         image.y = header.y + style->combo.content_padding.y;
         image.h = header.h - 2 * style->combo.content_padding.y;
         image.w = image.h;
+        image.x = image.x - image.w;
 
-        if (is_clicked)
+        if (is_active)
             nk_draw_image(&win->buffer, image, &img[1], nk_rgb_factor(nk_white, style->combo.color_factor));
         else
             nk_draw_image(&win->buffer, image, &img[0], nk_rgb_factor(nk_white, style->combo.color_factor));
 
         /* draw label */
         text.padding = nk_vec2(0,0);
-        label.x = image.x + image.w + style->combo.spacing.x + style->combo.content_padding.x;
+        label.x = header.x + style->combo.spacing.x + style->combo.content_padding.x;
         label.y = header.y + style->combo.content_padding.y;
         label.h = header.h - 2 * style->combo.content_padding.y;
         if (draw_button_symbol)
