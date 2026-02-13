@@ -659,7 +659,7 @@ nk_combo_begin_image_text(struct nk_context *ctx, const char *selected, int len,
         if (draw_button_symbol)
             label.w = (button.x - style->combo.content_padding.x) - label.x;
         else
-            label.w = (header.x + header.w - style->combo.content_padding.x) - label.x;
+            label.w = (header.x + header.w - style->combo.content_padding.x) - label.x - button.w - style->combo.button.padding.x * 2;
         nk_widget_text(&win->buffer, label, selected, len, &text, NK_TEXT_LEFT, style->font);
     }
     return nk_combo_begin(ctx, win, size, is_clicked, header);
